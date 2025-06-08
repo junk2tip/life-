@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Management Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .app-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tab-navigation {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 12px 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-card h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #00c851, #00ff41) !important;
+        }
+
+        .habit-item, .project-item, .journal-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            color: white;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .habit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .habit-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .streak-badge {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 20px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(45deg, #00c851, #00ff41);
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .habit-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .timer-display {
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 4rem;
+            color: white;
+            margin: 30px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            transition: color 0.3s ease;
+        }
+
+        .timer-display.warning {
+            color: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .timer-preset {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .timer-preset:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .timer-preset.active {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .voice-recorder {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .voice-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-button:hover {
+            transform: scale(1.05);
+        }
+
+        .voice-button.recording {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 107, 107, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+        }
+
+        .overdue {
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .due-soon {
+            border-left: 4px solid #ffd700;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: rgba(0, 200, 81, 0.9);
+        }
+
+        .notification.warning {
+            background: rgba(255, 193, 7, 0.9);
+        }
+
+        .notification.error {
+            background: rgba(220, 53, 69, 0.9);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .empty-state img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .custom-timer {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .custom-timer input {
+            width: 80px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .habit-streak-details {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .project-priority {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .priority-high {
+            background: rgba(255, 107, 107, 0.8);
+            color: white;
+        }
+
+        .priority-medium {
+            background: rgba(255, 193, 7, 0.8);
+            color: white;
+        }
+
+        .priority-low {
+            background: rgba(40, 167, 69, 0.8);
+            color: white;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-tag.active {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .app-header h1 {
+                font-size: 2rem;
+            }
+            
+            .timer-display {
+                font-size: 3rem;
+            }
+            
+            .voice-button {
+                width: 100px;
+                height: 100px;
+                font-size: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .habit-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .habit-controls .btn {
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                background: rgba(255, 255, 255, 0.15);
+            }
+        }
+
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="app-header">
+            <h1>🌟 Life Management Dashboard</h1>
+            <p>Your personal productivity companion</p>
+        </div>
+
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('habits')">✅ Habits</button>
+            <button class="tab-btn" onclick="switchTab('projects')">📋 Projects</button>
+            <button class="tab-btn" onclick="switchTab('timer')">⏰ Focus Timer</button>
+            <button class="tab-btn" onclick="switchTab('journal')">🎤 Voice Journal</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="glass-card">
+                <h2>📊 Today's Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="habits-completed">0</div>
+                        <div class="stat-label">Habits Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-streak">0</div>
+                        <div class="stat-label">Total Streak Days</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="active-projects">0</div>
+                        <div class="stat-label">Active Projects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="journal-entries">0</div>
+                        <div class="stat-label">Journal Entries</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-card">
+                <h2>🎯 Quick Actions</h2>
+                <button class="btn" onclick="switchTab('habits')">Track Habits</button>
+                <button class="btn" onclick="switchTab('projects')">Manage Projects</button>
+                <button class="btn" onclick="switchTab('timer')">Start Focus Session</button>
+                <button class="btn" onclick="switchTab('journal')">Voice Journal</button>
+            </div>
+
+            <div class="glass-card">
+                <h2>⚡ Recent Activity</h2>
+                <div id="recent-activity"></div>
+            </div>
+        </div>
+
+        <!-- Habits Tab -->
+        <div id="habits" class="tab-content">
+            <div class="glass-card">
+                <h2>✅ Add New Habit</h2>
+                <div class="form-group">
+                    <label for="habit-name">Habit Name</label>
+                    <input type="text" id="habit-name" placeholder="e.g., Drink 8 glasses of water" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="habit-target">Weekly Target</label>
+                    <input type="number" id="habit-target" placeholder="7" min="1" max="7" value="7">
+                </div>
+                <div class="form-group">
+                    <label for="habit-category">Category (Optional)</label>
+                    <select id="habit-category">
+                        <option value="">Select category</option>
+                        <option value="health">Health & Fitness</option>
+                        <option value="productivity">Productivity</option>
+                        <option value="learning">Learning</option>
+                        <option value="personal">Personal Development</option>
+                        <option value="social">Social</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="addHabit()">Add Habit</button>
+            </div>
+
+            <div class="glass-card">
+                <h2>📈 Your Habits</h2>
+                <div class="search-box">
+                    <input type="text" id="habit-search" placeholder="Search habits..." oninput="filterHabits()">
+                </div>
+                <div class="filter-tags">
+                    <button class="filter-tag active" onclick="filterHabitsByCategory('')">All</button>
+                    <button class="filter-tag" onclick="filterHabitsByCategory('health')">Health</button>
+                    <button class="filter-tag" onclick="filterHabitsByCategory('productivity')">Productivity</button>
+                    <button class="filter-tag" onclick="filterHabitsByCategory('learning')">Learning</button>
+                </div>
+                <div id="habits-list"></div>
+            </div>
+        </div>
+
+        <!-- Projects Tab -->
+        <div id="projects" class="tab-content">
+            <div class="glass-card">
+                <h2>📋 Add New Project</h2>
+                <div class="form-group">
+                    <label for="project-name">Project Name</label>
+                    <input type="text" id="project-name" placeholder="e.g., Website Redesign" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="project-desc">Description</label>
+                    <textarea id="project-desc" placeholder="Brief description of the project" maxlength="500"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="project-deadline">Deadline</label>
+                    <input type="date" id="project-deadline">
+                </div>
+                <div class="form-group">
+                    <label for="project-priority">Priority</label>
+                    <select id="project-priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="addProject()">Add Project</button>
+            </div>
+
+            <div class="glass-card">
+                <h2>🎯 Your Projects</h2>
+                <div class="search-box">
+                    <input type="text" id="project-search" placeholder="Search projects..." oninput="filterProjects()">
+                </div>
+                <div id="projects-list"></div>
+            </div>
+        </div>
+
+        <!-- Timer Tab -->
+        <div id="timer" class="tab-content">
+            <div class="glass-card">
+                <h2>⏰ Focus Timer</h2>
+                <div class="timer-display" id="timer-display">25:00</div>
+                
+                <div class="timer-controls">
+                    <button class="timer-preset active" onclick="setTimer(25)">25 min</button>
+                    <button class="timer-preset" onclick="setTimer(45)">45 min</button>
+                    <button class="timer-preset" onclick="setTimer(90)">90 min</button>
+                </div>
+
+                <div class="custom-timer">
+                    <span style="color: white;">Custom:</span>
+                    <input type="number" id="custom-minutes" placeholder="25" min="1" max="180">
+                    <span style="color: white;">minutes</span>
+                    <button class="btn" onclick="setCustomTimer()">Set</button>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn" onclick="startTimer()" id="start-btn">▶️ Start</button>
+                    <button class="btn" onclick="pauseTimer()" id="pause-btn">⏸️ Pause</button>
+                    <button class="btn" onclick="resetTimer()">🔄 Reset</button>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="color: white; opacity: 0.8;">Sessions completed today: <span id="sessions-today">0</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Journal Tab -->
+        <div id="journal" class="tab-content">
+            <div class="glass-card">
+                <h2>🎤 Voice Journal</h2>
+                <div class="voice-recorder">
+                    <button class="voice-button" id="voice-btn" onclick="toggleRecording()">🎤</button>
+                    <p style="color: white; margin-top: 20px;" id="recording-status">Click to start recording</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="journal-text">Journal Entry</label>
+                    <textarea id="journal-text" rows="6" placeholder="Your thoughts will appear here..." maxlength="5000"></textarea>
+                    <small style="color: rgba(255,255,255,0.7); float: right;" id="char-count">0/5000</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="journal-mood">Mood</label>
+                    <select id="journal-mood">
+                        <option value="">Select mood</option>
+                        <option value="excited">😊 Excited</option>
+                        <option value="happy">😄 Happy</option>
+                        <option value="content">😌 Content</option>
+                        <option value="neutral">😐 Neutral</option>
+                        <option value="tired">😴 Tired</option>
+                        <option value="stressed">😰 Stressed</option>
+                        <option value="sad">😢 Sad</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="saveJournalEntry()">💾 Save Entry</button>
+                <button class="btn" onclick="clearJournalEntry()">🗑️ Clear</button>
+            </div>
+
+            <div class="glass-card">
+                <h2>📝 Your Journal Entries</h2>
+                <div class="search-box">
+                    <input type="text" id="journal-search" placeholder="Search journal entries..." oninput="filterJournalEntries()">
+                </div>
+                <div id="journal-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Data storage with local persistence
+        let habits = JSON.parse(localStorage.getItem('life-dashboard-habits') || '[]');
+        let projects = JSON.parse(localStorage.getItem('life-dashboard-projects') || '[]');
+        let journalEntries = JSON.parse(localStorage.getItem('life-dashboard-journal') || '[]');
+        let timerSessions = JSON.parse(localStorage.getItem('life-dashboard-timer-sessions') || '[]');
+        
+        let timerState = {
+            minutes: 25,
+            seconds: 0,
+            isRunning: false,
+            intervalId: null,
+            originalMinutes: 25,
+            startTime: null
+        };
+        
+        let isRecording = false;
+        let recognition = null;
+        let currentFilter = '';
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDashboard();
+            renderHabits();
+            renderProjects();
+            renderJournalEntries();
+            initSpeechRecognition();
+            updateTimerSessionsToday();
+            setupCharacterCounter();
+            
+            // Set default deadline to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('project-deadline').value = tomorrow.toISOString().split('T')[0];
+
+            // Load saved timer state
+            const savedTimer = localStorage.getItem('life-dashboard-timer');
+            if (savedTimer) {
+                const saved = JSON.parse(savedTimer);
+                timerState.originalMinutes = saved.originalMinutes || 25;
+                setTimer(timerState.originalMinutes);
+            }
+        });
+
+        // Enhanced data persistence
+        function saveData() {
+            try {
+                localStorage.setItem('life-dashboard-habits', JSON.stringify(habits));
+                localStorage.setItem('life-dashboard-projects', JSON.stringify(projects));
+                localStorage.setItem('life-dashboard-journal', JSON.stringify(journalEntries));
+                localStorage.setItem('life-dashboard-timer-sessions', JSON.stringify(timerSessions));
+                localStorage.setItem('life-dashboard-timer', JSON.stringify({
+                    originalMinutes: timerState.originalMinutes
+                }));
+            } catch (error) {
+                console.error('Failed to save data:', error);
+                showNotification('Failed to save data', 'error');
+            }
+        }
+
+        // Character counter for journal
+        function setupCharacterCounter() {
+            const textarea = document.getElementById('journal-text');
+            const counter = document.getElementById('char-count');
+            
+            textarea.addEventListener('input', function() {
+                const length = this.value.length;
+                counter.textContent = `${length}/5000`;
+                
+                if (length > 4500) {
+                    counter.style.color = '#ff6b6b';
+                } else {
+                    counter.style.color = 'rgba(255,255,255,0.7)';
+                }
+            });
+        }
+
+        // Tab switching with URL hash support
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Update URL hash
+            window.location.hash = tabName;
+            
+            if (tabName === 'dashboard') {
+                updateDashboard();
+                updateRecentActivity();
+            }
+        }
+
+        // Enhanced notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Dashboard functions with recent activity
+        function updateDashboard() {
+            const today = new Date().toDateString();
+            
+            let completedHabits = 0;
+            let totalStreak = 0;
+            
+            habits.forEach(habit => {
+                if (habit.completions.includes(today)) {
+                    completedHabits++;
+                }
+                totalStreak += habit.streak;
+            });
+            
+            document.getElementById('habits-completed').textContent = completedHabits;
+            document.getElementById('total-streak').textContent = totalStreak;
+            document.getElementById('active-projects').textContent = projects.length;
+            document.getElementById('journal-entries').textContent = journalEntries.length;
+        }
+
+        function updateRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            let activities = [];
+            
+            // Recent habit completions
+            habits.forEach(habit => {
+                if (habit.completions.includes(today.toDateString())) {
+                    activities.push({
+                        type: 'habit',
+                        message: `✅ Completed habit: ${habit.name}`,
+                        time: 'Today'
+                    });
+                }
+            });
+            
+            // Recent journal entries
+            journalEntries.slice(0, 3).forEach(entry => {
+                const entryDate = new Date(entry.timestamp);
